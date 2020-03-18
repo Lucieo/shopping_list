@@ -1,45 +1,60 @@
 const graphql = require('graphql');
-const { GraphQLObjectType, GraphQLString, GraphQLID } = graphql;
+const { GraphQLObjectType, GraphQLString, GraphQLID, GraphQLInt } = graphql;
 const mongoose = require('mongoose');
-const Song = mongoose.model('song');
-const Lyric = mongoose.model('lyric');
-const SongType = require('./song_type');
-const LyricType = require('./lyric_type');
+const List = mongoose.model('list');
+const Item = mongoose.model('item');
+const ListType = require('./list_type');
+const ItemType = require('./item_type');
 
 const mutation = new GraphQLObjectType({
   name: 'Mutation',
   fields: {
-    addSong: {
-      type: SongType,
+    addList: {
+      type: ListType,
       args: {
         title: { type: GraphQLString }
       },
       resolve(parentValue, { title }) {
-        return (new Song({ title })).save()
+        return (new List({ title })).save()
       }
     },
-    addLyricToSong: {
-      type: SongType,
+    addItemToList: {
+      type: ListType,
       args: {
         content: { type: GraphQLString },
-        songId: { type: GraphQLID }
+        listId: { type: GraphQLID }
       },
-      resolve(parentValue, { content, songId }) {
-        return Song.addLyric(songId, content);
+      resolve(parentValue, { content, listId }) {
+        console.log('ADD ITEM TO LIST MUTATION')
+        return List.addItem(listId, content);
       }
     },
-    likeLyric: {
-      type: LyricType,
-      args: { id: { type: GraphQLID } },
-      resolve(parentValue, { id }) {
-        return Lyric.like(id);
+    removeItem: {
+      type: ListType,
+      args: {
+        itemId: { type: GraphQLID },
+        listId: { type: GraphQLID }
+      },
+      resolve(parentValue, { itemId, listId }) {
+        return List.removeItem(itemId, listId);
       }
     },
-    deleteSong: {
-      type: SongType,
+    modifyItemQuantity: {
+      type: ItemType,
+      args: { 
+        id: { type: GraphQLID },
+        quantity: {type: GraphQLInt},
+        listId: { type: GraphQLID }
+      },
+      resolve(parentValue, { id, quantity, listId }) {
+        return Item.setQuantity(id, quantity);
+      }
+    },
+    deleteList: {
+      type: ListType,
       args: { id: { type: GraphQLID } },
       resolve(parentValue, { id }) {
-        return Song.remove({ _id: id });
+        return List.remove({ _id: id });
       }
     }
   }

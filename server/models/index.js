@@ -1,2 +1,2 @@
-require('./song');
-require('./lyric');
+require('./list');
+require('./item');
